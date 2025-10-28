@@ -1,2 +1,7 @@
-# Micropop
-A small, accessible, dependency-free JS & CSS library for managing popups including tooltips.
+<h3 align="center">
+  MicroPop.js (version 0.1.0)
+</h3>
+
+<p align="center">
+  A lightweight, accessible, dependency-free JS and CSS library for creating customizable popup modals
+</p>
