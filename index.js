@@ -2,7 +2,8 @@
  * MicroPop.js
  * A small, accessible, dependency-free JS & CSS library
  * for managing popups including tooltips.
- * Version: 0.1.0
+ * Version: 0.1.1
+ * License: MIT
  */
 const MicroPop = (() => {
   'use strict'
@@ -11,6 +12,7 @@ const MicroPop = (() => {
   const popups = {}
   const options = {
     identifier: 'data-micropop-id',
+    debugMode: false,
     // Popup options
     openClass: 'is-open'
   }
@@ -33,7 +35,12 @@ const MicroPop = (() => {
       this.triggers = Array.isArray(triggers) ? triggers : [triggers]
 
       // Determine the popup element
+      if (!popup) throw new Error('[MicroPop] No popup was supplied to initialize the popup.')
       this.popup = typeof popup === 'string' ? document.getElementById(popup) : popup
+
+      if (!this.popup) {
+        throw new Error('[MicroPop] Could not find the popup element id:', popup || this.triggers[0])
+      }
 
       // Save options
       this.options = { openClass }
@@ -118,7 +125,10 @@ const MicroPop = (() => {
 
     const targetId = popupConfigs.targetPopupId
 
-    if (popups[targetId]) return
+    if (popups[targetId]) {
+      if (options.debugMode) console.warn('[MicroPop] Popup is already initialized:', targetId)
+      return popups[targetId]
+    }
     popups[targetId] = new Popup(popupConfigs)
 
     // Set the identifier attribute to the passed element
@@ -132,6 +142,8 @@ const MicroPop = (() => {
 
     if (popups[targetId]) {
       popups[targetId].show()
+    } else {
+      console.warn('[MicroPop]: The popup passed in show() is not initialized')
     }
   }
 
@@ -140,6 +152,8 @@ const MicroPop = (() => {
 
     if (popups[targetId]) {
       popups[targetId].hide()
+    } else {
+      console.warn('[MicroPop]: The popup passed in hide() is not initialized')
     }
   }
 
@@ -148,6 +162,8 @@ const MicroPop = (() => {
 
     if (popups[targetId]) {
       popups[targetId].toggle()
+    } else {
+      console.warn('[MicroPop]: The popup passed in toggle() is not initialized')
     }
   }
 
