@@ -2,7 +2,7 @@
  * MicroPop.js
  * A small, accessible, dependency-free JS & CSS library
  * for managing popups including tooltips.
- * Version: 0.1.1
+ * Version: 0.2.0 - auto-generate popups based on triggers
  * License: MIT
  */
 const MicroPop = (() => {
@@ -11,7 +11,9 @@ const MicroPop = (() => {
   // Store the popups initialized and the options
   const popups = {}
   const options = {
+    openTrigger: 'data-micropop-trigger',
     identifier: 'data-micropop-id',
+    libraryAttribute: 'data-micropop',
     debugMode: false,
     // Popup options
     openClass: 'is-open'
@@ -29,21 +31,36 @@ const MicroPop = (() => {
     constructor ({
       popup,
       triggers = [],
-      openClass = 'is-open'
+      openClass = 'is-open',
+      role = null
     }) {
+      let derivedRole = null
+
       // Make triggers an array
       this.triggers = Array.isArray(triggers) ? triggers : [triggers]
 
       // Determine the popup element
-      if (!popup) throw new Error('[MicroPop] No popup was supplied to initialize the popup.')
-      this.popup = typeof popup === 'string' ? document.getElementById(popup) : popup
-
-      if (!this.popup) {
-        throw new Error('[MicroPop] Could not find the popup element id:', popup || this.triggers[0])
+      if (!popup) {
+        if (!this.triggers.length) {
+          throw new Error('[MicroPop] No popup or trigger were supplied to initialize the popup.')
+        }
+        // If no popup is passed, derive it from the trigger
+        derivedRole = role || this.triggers[0].getAttribute(options.openTrigger).split(' ')[0]
+        if (!derivedRole) {
+          throw new Error('[MicroPop] No role could be derived from the trigger element.')
+        }
+        const attrName = options.libraryAttribute + '-' + derivedRole
+        const idFromTrigger = this.triggers[0].getAttribute(attrName)
+        if (!idFromTrigger) {
+          throw new Error('[MicroPop] No popup id could be derived from the trigger element.')
+        }
+        this.popup = document.getElementById(idFromTrigger)
+      } else {
+        this.popup = typeof popup === 'string' ? document.getElementById(popup) : popup
       }
 
       // Save options
-      this.options = { openClass }
+      this.options = { openClass, role }
 
       // Binds all methods to the instance
       this.show = this.show.bind(this)
@@ -51,9 +68,10 @@ const MicroPop = (() => {
       this.toggle = this.toggle.bind(this)
 
       // Register triggers and initialize the popup
-      this.triggerConfigs = triggers.map(trigger => {
+      this.triggerConfigs = this.triggers.map(trigger => {
         return {
-          element: trigger
+          element: trigger,
+          role: role || derivedRole
         }
       })
       this._init()
@@ -64,6 +82,27 @@ const MicroPop = (() => {
       this.popup.setAttribute('aria-haspopup', 'true')
       this.popup.setAttribute('aria-expanded', 'false')
       this.popup.setAttribute('aria-hidden', 'true')
+
+      // Attach appropriate role and event listeners to triggers
+      this.triggerConfigs.forEach(triggerConfig => {
+        const trigger = triggerConfig.element
+        const role = triggerConfig.role
+
+        if (role === 'tooltip') {
+          // elements that have tooltips
+          this.popup.setAttribute('role', 'tooltip')
+
+          trigger.addEventListener('mouseenter', this.show)
+          trigger.addEventListener('focus', this.show)
+          trigger.addEventListener('mouseleave', this.hide)
+          trigger.addEventListener('blur', this.hide)
+        } else if (role === 'dialog') {
+          // elements that toggle popups
+          this.popup.setAttribute('role', 'dialog')
+
+          trigger.addEventListener('click', this.toggle)
+        }
+      })
     }
 
     toggle (event) {
@@ -116,6 +155,30 @@ const MicroPop = (() => {
     return null
   }
 
+  const init = config => {
+    // Modifies the global options
+    Object.assign(options, config)
+
+    // Identifies all of the open triggers in the document
+    const triggers = document.querySelectorAll(`[${options.openTrigger}]`)
+
+    // Initialize 1 popup instance per trigger
+    triggers.forEach(trigger => {
+      const attributesToCheck = trigger.getAttribute(options.openTrigger).split(' ')
+
+      attributesToCheck.forEach(attr => {
+        const targetId = trigger.getAttribute(options.libraryAttribute + '-' + attr)
+        if (!targetId) return
+
+        initPopup({
+          popup: targetId,
+          triggers: trigger,
+          role: attr
+        })
+      })
+    })
+  }
+
   const initPopup = (config) => {
     const popupConfigs = Object.assign({ openClass: options.openClass }, config)
 
@@ -143,7 +206,7 @@ const MicroPop = (() => {
     if (popups[targetId]) {
       popups[targetId].show()
     } else {
-      console.warn('[MicroPop]: The popup passed in show() is not initialized')
+      console.warn('[MicroPop] The popup passed in show() is not initialized')
     }
   }
 
@@ -153,7 +216,7 @@ const MicroPop = (() => {
     if (popups[targetId]) {
       popups[targetId].hide()
     } else {
-      console.warn('[MicroPop]: The popup passed in hide() is not initialized')
+      console.warn('[MicroPop] The popup passed in hide() is not initialized')
     }
   }
 
@@ -163,18 +226,20 @@ const MicroPop = (() => {
     if (popups[targetId]) {
       popups[targetId].toggle()
     } else {
-      console.warn('[MicroPop]: The popup passed in toggle() is not initialized')
+      console.warn('[MicroPop] The popup passed in toggle() is not initialized')
     }
   }
 
   // Public APIs
   const exported = Popup
-  Object.assign(exported, { initPopup, show, hide, toggle, options, popups })
+  Object.assign(exported, { init, initPopup, show, hide, toggle, options, popups })
   return exported
 })()
 
+/*
 export default MicroPop
 
 if (typeof window !== 'undefined') {
   window.MicroPop = MicroPop
 }
+*/
