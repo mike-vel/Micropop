@@ -1,5 +1,5 @@
 <h3 align="center">
-  MicroPop.js (version 0.1.0)
+  MicroPop.js (version 0.2.0)
 </h3>
 
 <p align="center">
