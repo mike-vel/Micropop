@@ -1,4 +1,6 @@
 ## Release History
+* **0.2.1 - 11/2/2025**
+    * 🌀 `ENHANCEMENT` Adds support for multiple triggers for the same popup
 * **0.2.0 - auto-generate popups based on triggers - 10/30/2025**
     * 💡 `FEATURE` Added an option to initialize as tooltip or dialog
     * 💡 `FEATURE` Added an `init` function which initializes a popup for each trigger
