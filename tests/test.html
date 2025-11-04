@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <title>Micropop Test</title>
+        <script src="../lib/dist/micropop.min.js"></script>
+
+        <style>
+            .visible {
+                display: block !important;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Micropop Test Page</h1>
+        <button id="openPopupBtn"
+            data-micropop-trigger="tooltip dialog"
+            data-micropop-tooltip="myPopup"
+            data-micropop-dialog="myPopup2">Open Popup</button>
+        <div id="myPopup" style="display:none; border:1px solid black; padding:10px; background-color:#f0f0f0;">
+        This is a popup!
+        <button id="closePopupBtn">Close Popup [W.I.P]</button>
+        </div>
+        <div id="myPopup2" style="display:none; border:1px solid black; padding:10px; background-color:#f0f0f0;">
+        Pop-up #2
+        <button id="closePopupBtn">Close Pop-up #2 [W.I.P]</button>
+        </div>
+    
+        <script>
+            MicroPop.init({
+                openClass: 'visible'
+            })
+        </script>
+    </body>
+</html>
