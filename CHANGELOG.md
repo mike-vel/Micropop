@@ -1,5 +1,5 @@
 ## Release History
-* **0.2.2 - 10/28/2025**
+* **0.2.2 - 11/10/2025**
     * 🐞 `BUGFIX` ARIA attributes are now correctly added when initializing a dialog
 * **0.2.1 - 11/2/2025**
     * 🌀 `ENHANCEMENT` Adds support for multiple triggers for the same popup
